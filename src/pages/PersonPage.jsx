@@ -36,23 +36,22 @@ export default function PersonPage() {
   const orderedSourceIds = [...new Set(person.sourceIds)];
   const profileBreadcrumbPrefix = person.profileBreadcrumbPrefix ?? 'Profile /';
   const profileEyebrow = person.profileEyebrow ?? `${person.memberType} / ${person.category}`;
-  const showEvidenceStatus = person.showEvidenceStatus !== false;
-  const profileImageUrl = typeof person.profileImage === 'string'
-    && person.profileImage.startsWith('/manus-storage/')
-    && failedProfileSlug !== slug
-    ? person.profileImage
-    : '';
+  const profileImageCandidate = person.profileImage || person.image;
+  const isResolvableProfileImage = typeof profileImageCandidate === 'string'
+    && (profileImageCandidate.startsWith('/manus-storage/')
+      || (profileImageCandidate.startsWith('https://') && isSafeExternalUrl(profileImageCandidate)));
+  const profileImageUrl = isResolvableProfileImage && failedProfileSlug !== slug ? profileImageCandidate : '';
 
   return (
     <div className="page profile-page">
       <div className="page-kicker"><Link to={directoryPath} className="back-link"><ArrowLeft size={14} aria-hidden="true" /> {person.memberType === 'Founder' ? 'Founders' : 'Team'}</Link><span>{profileBreadcrumbPrefix} {person.id.toUpperCase()}</span></div>
-      <section className={`profile-hero${showEvidenceStatus ? '' : ' profile-hero--no-status'}`}>
+      <section className="profile-hero">
         <div className={`profile-monogram${profileImageUrl ? ' profile-monogram--photo' : ''}`} aria-hidden={profileImageUrl ? undefined : 'true'}>
           {profileImageUrl ? (
             <img
               className="profile-monogram-image"
               src={profileImageUrl}
-              alt={person.profileImageAlt || `Portrait of ${person.name}`}
+              alt={person.profileImageAlt || person.imageAlt || `Portrait of ${person.name}`}
               loading="eager"
               decoding="async"
               onError={() => setFailedProfileSlug(slug)}
@@ -70,12 +69,6 @@ export default function PersonPage() {
             ))}
           </div>
         </div>
-        {showEvidenceStatus && (
-          <div className={`evidence-status evidence-status--${person.verificationStatus}`}>
-            <span className="status-dot" aria-hidden="true" />
-            <span>{person.verificationStatus === 'verified' ? 'Role corroborated' : 'Public record is partial'}</span>
-          </div>
-        )}
       </section>
 
       <div className="profile-body-grid">

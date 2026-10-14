@@ -55,7 +55,6 @@ export default function SiteHeader() {
               {label}
             </NavLink>
           ))}
-          <Link className="header-cta" to="/team">Meet the people <span aria-hidden="true">↗</span></Link>
         </nav>
       </div>
     </header>
